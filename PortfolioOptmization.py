@@ -59,7 +59,6 @@ def compare_portfolio(dt_start, dt_end, symbols, lf_allocations):
 
     spy_price, spy_daily_cumulative_val, spy_rets = calc_basic_sim_info(dt_start, dt_end, ['SPY'], [1.0])
 
-    # we only want to graph the cumulative returns
     plt.clf()
     fig = plt.figure()
     fig.add_subplot(111)
@@ -76,23 +75,13 @@ def compare_portfolio(dt_start, dt_end, symbols, lf_allocations):
 def simulate(dt_start, dt_end, symbols, lf_allocations):
     na_price, na_daily_cumulative_val, na_rets = calc_basic_sim_info(dt_start, dt_end, symbols, lf_allocations)
 
-    # compute std deviation of daily returns
-    f_daily_std_deviation = numpy.std(na_rets)
-
-    #compute average of daily returns
-    f_avg_daily_return = numpy.mean(na_rets)
-
-    #get cumulative return from the last element of daily returns
-    f_cumulative_return = na_daily_cumulative_val[-1]
-
-    #get num of trading days (252 is assumed for assignment but check because
-    #the date range can change in other invocations)
+    vol = numpy.std(na_rets)
+    dailyRet = numpy.mean(na_rets)
+    cumulativeRet = na_daily_cumulative_val[-1]
     i_trading_days = na_price.shape[0]
+    sharpe = (numpy.sqrt(i_trading_days) * dailyRet) / vol
 
-    #calc the Sharpe Ratio
-    f_sharpe_ratio = (numpy.sqrt(i_trading_days) * f_avg_daily_return) / f_daily_std_deviation
-
-    return f_daily_std_deviation, f_avg_daily_return, f_sharpe_ratio, f_cumulative_return
+    return vol, dailyRet, sharpe, cumulativeRet
 
 
 def main():
