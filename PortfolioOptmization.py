@@ -32,23 +32,13 @@ def init_data(dt_start, dt_end, symbols):
 def calc_basic_sim_info(dt_start, dt_end, symbols, lf_allocations):
     d_data = init_data(dt_start, dt_end, symbols)
 
-    # Getting the numpy ndarray of close prices.
+
     na_price = d_data['close'].values
-
-    # Normalizing the prices to start at 1 and see relative returns
     na_normalized_price = na_price / na_price[0, :]
-
-    # multiply each price by the allocation
     na_allocated_price = na_normalized_price * lf_allocations
-
-    #calc cumulative portfolio value for each day
     na_daily_cumulative_val = numpy.apply_along_axis(numpy.sum, 1, na_allocated_price)
 
-    # Copy the normalized cumulative value to a new ndarry to find returns.
     na_rets = na_daily_cumulative_val.copy()
-
-    # Calculate the daily returns of the prices. (Inplace calculation)
-    # returnize0 works on ndarray and not dataframes.
     tsu.returnize0(na_rets)
 
     return na_price, na_daily_cumulative_val, na_rets
@@ -73,7 +63,18 @@ def compare_portfolio(dt_start, dt_end, symbols, lf_allocations):
 
 
 def simulate(dt_start, dt_end, symbols, lf_allocations):
-    na_price, na_daily_cumulative_val, na_rets = calc_basic_sim_info(dt_start, dt_end, symbols, lf_allocations)
+    
+    d_data = init_data(dt_start, dt_end, symbols)
+
+    na_price = d_data['close'].values
+    na_normalized_price = na_price / na_price[0, :]
+    na_allocated_price = na_normalized_price * lf_allocations
+    
+    na_daily_cumulative_val = numpy.apply_along_axis(numpy.sum, 1, na_allocated_price)
+
+    na_rets = na_daily_cumulative_val.copy()
+    
+    tsu.returnize0(na_rets)
 
     vol = numpy.std(na_rets)
     dailyRet = numpy.mean(na_rets)
@@ -128,7 +129,6 @@ def generate_allocations(symbols):
     # list of possible allocations
     lf_range = numpy.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
 
-    #accumulator for input to cartesian product
     lf_lists = []
 
     for symbol in symbols:
@@ -198,13 +198,6 @@ def cartesian(arrays, out=None):
         for j in xrange(1, arrays[0].size):
             out[j * m:(j + 1) * m, 1:] = out[0:m, 1:]
     return out
-
-
-def is_valid_allocation(lf_allocation):
-    if numpy.sum(lf_allocation) == 1.0:
-        return True
-    else:
-        return False
 
 
 if __name__ == '__main__':
